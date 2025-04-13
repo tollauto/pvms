@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>轉頁式路牌控制器！v1.0</title>
+  <style>
+    html, body {
+      /*max-height: 100vh;
+      overflow-y: hidden;*/
+      margin: 0;
+      padding: 0;
+      background-color: #94b7da;
+      color: #888888;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    body {
+      
+    }
+    #floating-textbox {
+      position: absolute;
+      top: 1700px; /* adjust as needed */
+      left: 100px; /* adjust as needed */
+      width: 1500px;
+      height: 600px;
+      background-color: rgba(0, 0, 0, 0.5); /* 50% transparent black */
+      color: white;
+      padding: 10px;
+      box-sizing: border-box;
+      font-size: 30px;
+      overflow-y: auto; /* scroll if text overflows */
+      z-index: 999; /* ensures it’s on top */
+      border-radius: 20px; /* optional: rounded corners */
+}
+
+    #viewport-wrapper {
+      width: 100vw;
+      height: 130vh; /* or use the scaled height if you prefer */
+      overflow: hidden;
+      position: relative;
+    }
+
+    #scaling-wrapper {
+      transform-origin: top left;
+      position: relative;
+    }
+
+    #background-wrapper {
+      width: 3900px;
+      height: 2735px;
+      background-image: url('stonecutter_background2.png');
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      margin: auto;
+      overflow: hidden;
+    }
+
+    #prism-container {
+      position: absolute;
+      top: 475px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 1886px;
+      height: 718px;
+      background-color: #555555;
+    }
+
+    .prism {
+      width: 1886px;
+      height: 20px;
+      position: relative;
+      perspective: 1000px;
+      margin-bottom: 1px;
+      background-color: #333333;
+    }
+
+    .prism:last-child {
+      margin-bottom: 0;
+    }
+
+    .prism-inner {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+      transition: transform 4s ease-in-out;
+    }
+
+    .prism-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-size: 1886px 683px;
+      backface-visibility: hidden;
+    }
+
+    .face1 { transform: rotateX(0deg) translateZ(14px); }
+    .face2 { transform: rotateX(120deg) translateZ(14px); }
+    .face3 { transform: rotateX(240deg) translateZ(14px); }
+
+    select {
+      margin: 5px;
+      padding: 5px;
+      font-size: 16px;
+      background-color: #bdccd9;
+      color: #888888;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button {
+      margin-top: 0px;
+      margin-bottom: 0px;
+      margin: 10px;
+      padding: 8px 16px;
+      font-size: 16px;
+      background-color: #888888;
+      color: #bdccd9;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: orange;
+      color: #888888;
+    }
+
+    .flashing-light {
+      width: 50px;
+      height: 50px;
+      background-color: black;
+      border-radius: 50%;
+      position: absolute;
+      top: 815px;
+    }
+
+    .left-light { left: calc(50% - 970px - 60px); }
+    .right-light { right: calc(50% - 970px - 60px); }
+
+    @keyframes flash-left {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    @keyframes flash-right {
+      0%, 49% { opacity: 0; }
+      50%, 100% { opacity: 1; }
+    }
+
+    .flash-left {
+      animation: flash-left 1s infinite linear;
+      background-color: orange !important;
+    }
+
+    .flash-right {
+      animation: flash-right 1s infinite linear;
+      background-color: orange !important;
+    }
+
+    /* Arrow UI styles */
+    #input-container-arrow {
+      margin-top: 0px;
+      text-align: center;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+      /* line display */
+      display: flex;
+      justify-content: center;
+      gap: 0px; /* spacing between each control */
+      flex-wrap: wrap; /* optional: wraps on smaller screens */
+    }
+
+    #display-container-arrow {
+      position: absolute;
+      top: 1306px;
+      left: 0;
+    }
+
+    .arrow-img {
+      position: absolute;
+      width: 220px;
+      height: 103px;
+      object-fit: contain;
+    }
+    /* line display */
+    .arrow-control {
+      display: flex;
+      align-items: center;
+      gap: 0px;
+    }
+
+    #left-img { left: 1168px; }
+    #center-img { left: 1836px; }
+    #right-img { left: 2483px; }
+
+    #scaling-wrapper {
+      transform-origin: top left;
+      position: relative;
+      overflow: hidden;
+      width: 3900px; /* Ensures consistent layout before scaling */
+    }
+
+  </style>
+</head>
+
+<body>
+  <!--Start of control and everything-->
+  <label for="imageSelector">選擇顯示:</label>
+  <select id="imageSelector">
+    <option value="pvms_fads022_p1.png" selected>Display 1</option>
+    <option value="pvms_fads022_p2.png">Display 2</option>
+    <option value="pvms_fads022_p3.png">Display 3</option>
+  </select>
+
+  <button onclick="engageRotation()">Send</button>
+  <!--<button onclick="toggleLights()">Toggle Lights</button>-->
+
+  <!-- Arrow Control -->
+  <div id="input-container-arrow">
+    <div class="arrow-control">
+      <label for="left-select">左線:</label>
+      <select id="left-select">
+        <option value="lcs/2.png">綠箭</option>
+        <option value="lcs/5.gif">綠箭閃</option>
+        <option value="lcs/6.gif">左斜</option>
+        <option value="lcs/7.gif">右斜</option>
+        <option value="lcs/3.gif">紅交叉</option>
+        <option value="lcs/4.gif">閃燈</option>
+        <option value="lcs/1.png">關</option>
+      </select>
+    </div>
+
+    <div class="arrow-control">
+      <label for="center-select">中線:</label>
+      <select id="center-select">
+        <option value="lcs/2.png">綠箭</option>
+        <option value="lcs/5.gif">綠箭閃</option>
+        <option value="lcs/6.gif">左斜</option>
+        <option value="lcs/7.gif">右斜</option>
+        <option value="lcs/3.gif">紅交叉</option>
+        <option value="lcs/4.gif">閃燈</option>
+        <option value="lcs/1.png">關</option>
+      </select>
+    </div>
+
+    <div class="arrow-control">
+      <label for="right-select">右線:</label>
+      <select id="right-select">
+        <option value="lcs/2.png">綠箭</option>
+        <option value="lcs/5.gif">綠箭閃</option>
+        <option value="lcs/6.gif">左斜</option>
+        <option value="lcs/7.gif">右斜</option>
+        <option value="lcs/3.gif">紅交叉</option>
+        <option value="lcs/4.gif">閃燈</option>
+        <option value="lcs/1.png">關</option>
+      </select>
+    </div>
+  </div>
+  <div id="viewport-wrapper">
+    <div id="scaling-wrapper">
+      <div id="background-wrapper">
+        <div id="light-left" class="flashing-light left-light"></div>
+        <div id="prism-container"></div>
+        <div id="light-right" class="flashing-light right-light"></div>
+
+        <div id="floating-textbox">
+          <br/>
+          《關於可變信息顯示屏》<br/>
+          <br/>
+          英文全寫為Fully Variable Message Sign（FVMS）<br/>
+          因不同工程項目要求及技術轉變，各道路管制區之顯示屏規格並不盡相同，如英文行數、中英文字數限制、圖案細節、閃燈數目等。<br/>
+
+          《更新紀錄》<br/>
+          2025.4.13 - v1.0 Launch<br/>
+          <br/>
+          Contact: angryusagi.road@gmail.com | 2025<br/>
+        </div>
+
+        <!-- Arrow Display -->
+        <div id="display-container-arrow">
+          <img id="left-img" src="lcs/1.png" class="arrow-img">
+          <img id="center-img" src="lcs/1.png" class="arrow-img">
+          <img id="right-img" src="lcs/1.png" class="arrow-img">
+        </div>
+      </div>
+    </div>
+
+  <script>
+    const images = ["pvms_fads022_p1.png", "pvms_fads022_p2.png", "pvms_fads022_p3.png"];
+    const numPrisms = 34;
+    const prismSpacing = 1;
+    let currentImageIndex = 0;
+    let lightsOn = false;
+
+    function generatePrisms() {
+      const container = document.getElementById("prism-container");
+      container.innerHTML = "";
+
+      const availableHeight = 718 - (numPrisms - 1) * prismSpacing;
+      const prismHeight = availableHeight / numPrisms;
+
+      for (let i = 0; i < numPrisms; i++) {
+        const prism = document.createElement("div");
+        prism.classList.add("prism");
+        prism.style.height = `${prismHeight}px`;
+
+        const inner = document.createElement("div");
+        inner.classList.add("prism-inner");
+        inner.dataset.index = i;
+
+        const face1 = document.createElement("div");
+        const face2 = document.createElement("div");
+        const face3 = document.createElement("div");
+
+        face1.classList.add("prism-face", "face1");
+        face2.classList.add("prism-face", "face2");
+        face3.classList.add("prism-face", "face3");
+
+        const positionY = -i * prismHeight + "px";
+
+        face1.style.backgroundImage = `url(${images[0]})`;
+        face1.style.backgroundPosition = `0px ${positionY}`;
+        face2.style.backgroundImage = `url(${images[1]})`;
+        face2.style.backgroundPosition = `0px ${positionY}`;
+        face3.style.backgroundImage = `url(${images[2]})`;
+        face3.style.backgroundPosition = `0px ${positionY}`;
+
+        inner.appendChild(face1);
+        inner.appendChild(face2);
+        inner.appendChild(face3);
+        prism.appendChild(inner);
+        container.appendChild(prism);
+      }
+    }
+
+    function engageRotation() {
+      const selectedImage = document.getElementById("imageSelector").value;
+      currentImageIndex = images.indexOf(selectedImage);
+      const rotationAngle = -currentImageIndex * 120;
+
+      document.querySelectorAll(".prism-inner").forEach(inner => {
+        inner.style.transform = `rotateX(${rotationAngle}deg)`;
+      });
+
+      const left = document.getElementById("light-left");
+      const right = document.getElementById("light-right");
+
+      if (currentImageIndex === 0) {
+        left.classList.remove("flash-left");
+        right.classList.remove("flash-right");
+        left.style.backgroundColor = "black";
+        right.style.backgroundColor = "black";
+        lightsOn = false;
+      } else {
+        left.classList.add("flash-left");
+        right.classList.add("flash-right");
+        lightsOn = true;
+      }
+    }
+
+    function toggleLights() {
+      const left = document.getElementById("light-left");
+      const right = document.getElementById("light-right");
+
+      if (lightsOn) {
+        left.classList.remove("flash-left");
+        right.classList.remove("flash-right");
+        left.style.backgroundColor = "black";
+        right.style.backgroundColor = "black";
+      } else {
+        left.classList.add("flash-left");
+        right.classList.add("flash-right");
+      }
+
+      lightsOn = !lightsOn;
+    }
+
+    function updateArrowDisplays() {
+      document.getElementById("left-img").src = document.getElementById("left-select").value;
+      document.getElementById("center-img").src = document.getElementById("center-select").value;
+      document.getElementById("right-img").src = document.getElementById("right-select").value;
+    }
+
+    /*function applyScale() {
+      const wrapper = document.getElementById("scaling-wrapper");
+      const scale = window.innerWidth / 3900; // Base width of background
+
+      wrapper.style.transform = `scale(${scale})`;
+      wrapper.style.width = `${3900}px`; // Keep the original width
+    }*/
+    function applyScale() {
+      const wrapper = document.getElementById("scaling-wrapper");
+      const scale = window.innerWidth / 3900; // Match your full width
+
+      wrapper.style.transform = `scale(${scale})`;
+      wrapper.style.transformOrigin = "top left";
+    }
+
+
+
+    window.addEventListener("resize", applyScale);
+
+    window.onload = () => {
+      generatePrisms();
+      updateArrowDisplays();
+      applyScale();
+    };
+
+    ["left-select", "center-select", "right-select"].forEach(id => {
+      document.getElementById(id).addEventListener("change", updateArrowDisplays);
+    });
+  </script>
+</body>
+</html>
