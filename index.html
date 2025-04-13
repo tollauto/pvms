@@ -3,16 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>翻頁路牌控制器 v0.2</title>
+  <title>轉頁式路牌控制器！v1.0</title>
   <style>
     html, body {
+      /*max-height: 100vh;
+      overflow-y: hidden;*/
       margin: 0;
       padding: 0;
-      background-color: #97bbdc;
-      color: white;
+      background-color: #94b7da;
+      color: #888888;
       font-family: Arial, sans-serif;
       text-align: center;
       overflow-x: hidden;
+    }
+
+    body {
+      
+    }
+    #floating-textbox {
+      position: absolute;
+      top: 1700px; /* adjust as needed */
+      left: 100px; /* adjust as needed */
+      width: 1500px;
+      height: 600px;
+      background-color: rgba(0, 0, 0, 0.5); /* 50% transparent black */
+      color: white;
+      padding: 20px 20px 20px 20px;
+      box-sizing: border-box;
+      font-size: 30px;
+      text-align: left;
+      overflow-y: auto; /* scroll if text overflows */
+      z-index: 999; /* ensures it’s on top */
+      border-radius: 20px; /* optional: rounded corners */
+}
+
+    #viewport-wrapper {
+      width: 100vw;
+      height: 130vh; /* or use the scaled height if you prefer */
+      overflow: hidden;
+      position: relative;
     }
 
     #scaling-wrapper {
@@ -79,21 +108,23 @@
     .face3 { transform: rotateX(240deg) translateZ(14px); }
 
     select {
-      margin: 10px;
+      margin: 5px;
       padding: 5px;
       font-size: 16px;
-      background-color: #222;
-      color: white;
+      background-color: #bdccd9;
+      color: #888888;
       border: none;
       border-radius: 5px;
     }
 
     button {
+      margin-top: 0px;
+      margin-bottom: 0px;
       margin: 10px;
       padding: 8px 16px;
       font-size: 16px;
-      background-color: orange;
-      color: white;
+      background-color: #888888;
+      color: #bdccd9;
       border: none;
       border-radius: 5px;
       cursor: pointer;
@@ -101,7 +132,8 @@
     }
 
     button:hover {
-      background-color: darkorange;
+      background-color: orange;
+      color: #888888;
     }
 
     .flashing-light {
@@ -138,11 +170,16 @@
 
     /* Arrow UI styles */
     #input-container-arrow {
-      margin-top: 20px;
+      margin-top: 0px;
       text-align: center;
       width: 80%;
       margin-left: auto;
       margin-right: auto;
+      /* line display */
+      display: flex;
+      justify-content: center;
+      gap: 0px; /* spacing between each control */
+      flex-wrap: wrap; /* optional: wraps on smaller screens */
     }
 
     #display-container-arrow {
@@ -156,6 +193,12 @@
       width: 220px;
       height: 103px;
       object-fit: contain;
+    }
+    /* line display */
+    .arrow-control {
+      display: flex;
+      align-items: center;
+      gap: 0px;
     }
 
     #left-img { left: 1168px; }
@@ -173,68 +216,86 @@
 </head>
 
 <body>
-  <div id="scaling-wrapper">
-    <div id="background-wrapper">
-      <div id="light-left" class="flashing-light left-light"></div>
-      <div id="prism-container"></div>
-      <div id="light-right" class="flashing-light right-light"></div>
-
-      <!-- Arrow Display -->
-      <div id="display-container-arrow">
-        <img id="left-img" src="lcs/1.png" class="arrow-img">
-        <img id="center-img" src="lcs/1.png" class="arrow-img">
-        <img id="right-img" src="lcs/1.png" class="arrow-img">
-      </div>
-    </div>
-    <div style="margin-top: 20px; text-align: center;">
-  <h1>PVMS Controller Beta</h1>
-
-  <label for="imageSelector">Select face:</label>
+  <!--Start of control and everything-->
+  <label for="imageSelector">選擇顯示:</label>
   <select id="imageSelector">
-    <option value="pvms_fads022_p1.png" selected>1.png</option>
-    <option value="pvms_fads022_p2.png">2.png</option>
-    <option value="pvms_fads022_p3.png">3.png</option>
+    <option value="pvms_fads022_p1.png" selected>Display 1</option>
+    <option value="pvms_fads022_p2.png">Display 2</option>
+    <option value="pvms_fads022_p3.png">Display 3</option>
   </select>
 
-  <button onclick="engageRotation()">Engage</button>
-  <button onclick="toggleLights()">Toggle Lights</button>
+  <button onclick="engageRotation()">Send</button>
+  <!--<button onclick="toggleLights()">Toggle Lights</button>-->
 
   <!-- Arrow Control -->
   <div id="input-container-arrow">
-    <p>左線:</p>
-    <select id="left-select">
-      <option value="lcs/1.png">關</option>
-      <option value="lcs/2.png">綠箭</option>
-      <option value="lcs/5.gif">綠箭閃</option>
-      <option value="lcs/6.gif">左斜</option>
-      <option value="lcs/7.gif">右斜</option>
-      <option value="lcs/3.gif">紅交叉</option>
-      <option value="lcs/4.gif">閃燈</option>
-    </select>
+    <div class="arrow-control">
+      <label for="left-select">左線:</label>
+      <select id="left-select">
+        <option value="lcs/2.png">綠箭</option>
+        <option value="lcs/5.gif">綠箭閃</option>
+        <option value="lcs/6.gif">左斜</option>
+        <option value="lcs/7.gif">右斜</option>
+        <option value="lcs/3.gif">紅交叉</option>
+        <option value="lcs/4.gif">閃燈</option>
+        <option value="lcs/1.png">關</option>
+      </select>
+    </div>
 
-    <p>中線:</p>
-    <select id="center-select">
-      <option value="lcs/1.png">關</option>
-      <option value="lcs/2.png">綠箭</option>
-      <option value="lcs/5.gif">綠箭閃</option>
-      <option value="lcs/6.gif">左斜</option>
-      <option value="lcs/7.gif">右斜</option>
-      <option value="lcs/3.gif">紅交叉</option>
-      <option value="lcs/4.gif">閃燈</option>
-    </select>
+    <div class="arrow-control">
+      <label for="center-select">中線:</label>
+      <select id="center-select">
+        <option value="lcs/2.png">綠箭</option>
+        <option value="lcs/5.gif">綠箭閃</option>
+        <option value="lcs/6.gif">左斜</option>
+        <option value="lcs/7.gif">右斜</option>
+        <option value="lcs/3.gif">紅交叉</option>
+        <option value="lcs/4.gif">閃燈</option>
+        <option value="lcs/1.png">關</option>
+      </select>
+    </div>
 
-    <p>右線:</p>
-    <select id="right-select">
-      <option value="lcs/1.png">關</option>
-      <option value="lcs/2.png">綠箭</option>
-      <option value="lcs/5.gif">綠箭閃</option>
-      <option value="lcs/6.gif">左斜</option>
-      <option value="lcs/7.gif">右斜</option>
-      <option value="lcs/3.gif">紅交叉</option>
-      <option value="lcs/4.gif">閃燈</option>
-    </select>
+    <div class="arrow-control">
+      <label for="right-select">右線:</label>
+      <select id="right-select">
+        <option value="lcs/2.png">綠箭</option>
+        <option value="lcs/5.gif">綠箭閃</option>
+        <option value="lcs/6.gif">左斜</option>
+        <option value="lcs/7.gif">右斜</option>
+        <option value="lcs/3.gif">紅交叉</option>
+        <option value="lcs/4.gif">閃燈</option>
+        <option value="lcs/1.png">關</option>
+      </select>
+    </div>
   </div>
-  </div>
+  <div id="viewport-wrapper">
+    <div id="scaling-wrapper">
+      <div id="background-wrapper">
+        <div id="light-left" class="flashing-light left-light"></div>
+        <div id="prism-container"></div>
+        <div id="light-right" class="flashing-light right-light"></div>
+
+        <div id="floating-textbox">
+          《關於轉頁式路牌》－ Prismatic Variable Message Signs（PVMS）<br/>
+          <br/>
+          又名翻頁式路牌、或「三面柱體可變信息顯示屏」。顧名思義，顯示牌由多條橫向三面柱體組成，「當發生事故或天氣惡劣時，用以提供臨時交通改道安排的資訊」（TD, 2024）。<br/>
+          <br/>
+          PVMS常見於隧道、橋樑引道、及重要基建。當中有大規模應用如赤鱲角機場（機場內部路網改道、以至青嶼幹線封閉）、青嶼幹線、青沙公路、將藍公路等。此外亦常見於各大隧道，以顯示隧道圖示、擠塞（常見於香港仔）、及隧道關閉。顯示改道資訊時，閃燈亦會隨之亮起。目前香港大部份PVMS由荷蘭供應商Rotapanel製造，亦為世界各國普遍使用。<br/>
+          <br/>
+          《更新紀錄》<br/>
+          2025.4.15 - v1.0 Launch!<br/>
+          Contact: angryusagi.road@gmail.com | 2025<br/>
+          本網頁與任何機構或部門並無關連。<br/>
+        </div>
+
+        <!-- Arrow Display -->
+        <div id="display-container-arrow">
+          <img id="left-img" src="lcs/1.png" class="arrow-img">
+          <img id="center-img" src="lcs/1.png" class="arrow-img">
+          <img id="right-img" src="lcs/1.png" class="arrow-img">
+        </div>
+      </div>
+    </div>
 
   <script>
     const images = ["pvms_fads022_p1.png", "pvms_fads022_p2.png", "pvms_fads022_p3.png"];
@@ -332,12 +393,21 @@
       document.getElementById("right-img").src = document.getElementById("right-select").value;
     }
 
-    function applyScale() {
+    /*function applyScale() {
       const wrapper = document.getElementById("scaling-wrapper");
       const scale = window.innerWidth / 3900; // Base width of background
+
       wrapper.style.transform = `scale(${scale})`;
       wrapper.style.width = `${3900}px`; // Keep the original width
+    }*/
+    function applyScale() {
+      const wrapper = document.getElementById("scaling-wrapper");
+      const scale = window.innerWidth / 3900; // Match your full width
+
+      wrapper.style.transform = `scale(${scale})`;
+      wrapper.style.transformOrigin = "top left";
     }
+
 
 
     window.addEventListener("resize", applyScale);
